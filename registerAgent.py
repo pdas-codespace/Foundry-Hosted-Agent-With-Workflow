@@ -22,10 +22,10 @@ agent = client.agents.create_version(
         image=os.getenv("AGENT_CONTAINER_IMAGE"),
         environment_variables={
             "AZURE_AI_PROJECT_ENDPOINT": os.getenv("AZURE_AI_PROJECT_ENDPOINT"),
-            "MODEL_NAME": "gpt-5"#,
-            #"AZURE_TENANT_ID": os.getenv("AZURE_TENANT_ID"),
-            #"AZURE_CLIENT_ID": os.getenv("AZURE_CLIENT_ID"),
-            #"AZURE_CLIENT_SECRET": os.getenv("AZURE_CLIENT_SECRET")         
+            "MODEL_NAME": "gpt-5",
+            "AZURE_OPENAI_CHAT_DEPLOYMENT_NAME": "gpt-5",
+            "AZURE_OPENAI_ENDPOINT": os.getenv("AZURE_OPENAI_ENDPOINT")
+      
         }
     )
 )

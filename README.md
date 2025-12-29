@@ -58,19 +58,34 @@ This repository includes a GitHub Actions workflow that automatically builds and
 
 Add the following secrets to your repository (Settings → Secrets and variables → Actions):
 
-1. **`AZURE_CREDENTIALS`** - Service Principal credentials in JSON format:
-   ```bash
-   az ad sp create-for-rbac --name "github-foundry-agent-cicd" \
-     --role contributor \
-     --scopes /subscriptions/<subscription-id>/resourceGroups/<resource-group> \
-     --sdk-auth
-   ```
-   Copy the entire JSON output as the secret value.
+One sample gh command to help you achieve that - 
 
-2. **`AZURE_AI_PROJECT_ENDPOINT`** - Your Foundry project endpoint:
-   ```
-   https://<foundry-account>.services.ai.azure.com/api/projects/<project-name>
-   ```
+```bash
+
+# Set a simple text secret
+gh secret set AGENT_NAME --repo <user-name>/<repo-name> --body "testconcurrentflowasagent"
+
+```
+
+| Secret Name | Description | Example Value |
+|-------------|-------------|---------------|
+| `AZURE_CREDENTIALS` | Service Principal credentials (JSON) | See below |
+| `AZURE_AI_PROJECT_ENDPOINT` | Foundry project endpoint | `https://<foundry-account>.services.ai.azure.com/api/projects/<project-name>` |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint | `https://<foundry-account>.openai.azure.com/` |
+| `ACR_NAME` | Azure Container Registry name | `myacr` (without .azurecr.io) |
+| `IMAGE_NAME` | Container image name | `foundry-workflow-agent` |
+| `FOUNDRY_ACCOUNT` | Foundry account name | `myfoundryaccount` |
+| `PROJECT_NAME` | Foundry project name | `myproject` |
+| `AGENT_NAME` | Name for the hosted agent | `MyHostedAgent` |
+
+**Create `AZURE_CREDENTIALS`:**
+```bash
+az ad sp create-for-rbac --name "github-foundry-agent-cicd" \
+  --role contributor \
+  --scopes /subscriptions/<subscription-id>/resourceGroups/<resource-group> \
+  --sdk-auth
+```
+Copy the entire JSON output as the secret value and use to set AZURE_CREDENTIALS
 
 ### Required Role Assignments for CI/CD Service Principal
 

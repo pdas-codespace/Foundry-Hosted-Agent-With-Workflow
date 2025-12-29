@@ -63,6 +63,7 @@ jobs:
           AZURE_AI_PROJECT_ENDPOINT: ${{ secrets.AZURE_AI_PROJECT_ENDPOINT }}
           AGENT_CONTAINER_IMAGE: ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
           AGENT_NAME: ${{ secrets.AGENT_NAME }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
         run: |
           python -c "
           import os
@@ -85,7 +86,8 @@ jobs:
                   environment_variables={
                       'AZURE_AI_PROJECT_ENDPOINT': os.environ['AZURE_AI_PROJECT_ENDPOINT'],
                       'AZURE_OPENAI_CHAT_DEPLOYMENT_NAME': 'gpt-5',
-                      'MODEL_NAME': 'gpt-5'
+                      'MODEL_NAME': 'gpt-5',
+                      'AZURE_OPENAI_ENDPOINT': os.environ["AZURE_OPENAI_ENDPOINT"]
                   }
               )
           )
