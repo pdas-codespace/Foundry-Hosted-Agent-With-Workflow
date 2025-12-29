@@ -18,7 +18,7 @@ This agent uses the Microsoft Agent Framework to create a concurrent workflow:
 
 ## Setup
 
-### 1. Clone and Configure
+### 1. Clone and Configure (DevContainer also supported for you to launch through GH Codespaces)
 
 ```bash
 # Clone the repository
@@ -141,6 +141,7 @@ az cognitiveservices agent start \
 ```bash
 python callHostedAgent.py
 ```
+You can also test the deployed agent through Foundry Playground.
 
 ## Security Notes
 
