@@ -1,0 +1,116 @@
+name: Build and Deploy Foundry Hosted Agent
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'main.py'
+      - 'requirements.txt'
+      - 'Dockerfile'
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Version tag for the container image (e.g., v8)'
+        required: false
+        default: ''
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate version tag
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version_tag }}" ]; then
+            VERSION="${{ github.event.inputs.version_tag }}"
+          else
+            VERSION="v${{ github.run_number }}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Generated version: $VERSION"
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to Azure Container Registry
+        run: |
+          az acr login --name ${{ secrets.ACR_NAME }}
+
+      - name: Build and push container image
+        run: |
+          az acr build \
+            --image ${{ secrets.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }} \
+            --registry ${{ secrets.ACR_NAME }}.azurecr.io \
+            --file Dockerfile .
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install azure-ai-projects azure-identity
+
+      - name: Register new agent version
+        env:
+          AZURE_AI_PROJECT_ENDPOINT: ${{ secrets.AZURE_AI_PROJECT_ENDPOINT }}
+          AGENT_CONTAINER_IMAGE: ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
+          AGENT_NAME: ${{ secrets.AGENT_NAME }}
+        run: |
+          python -c "
+          import os
+          from azure.ai.projects import AIProjectClient
+          from azure.ai.projects.models import ImageBasedHostedAgentDefinition, ProtocolVersionRecord, AgentProtocol
+          from azure.identity import DefaultAzureCredential
+
+          client = AIProjectClient(
+              endpoint=os.environ['AZURE_AI_PROJECT_ENDPOINT'],
+              credential=DefaultAzureCredential()
+          )
+
+          agent = client.agents.create_version(
+              agent_name=os.environ['AGENT_NAME'],
+              definition=ImageBasedHostedAgentDefinition(
+                  container_protocol_versions=[ProtocolVersionRecord(protocol=AgentProtocol.RESPONSES, version='v1')],
+                  cpu='1',
+                  memory='2Gi',
+                  image=os.environ['AGENT_CONTAINER_IMAGE'],
+                  environment_variables={
+                      'AZURE_AI_PROJECT_ENDPOINT': os.environ['AZURE_AI_PROJECT_ENDPOINT'],
+                      'MODEL_NAME': 'gpt-5'
+                  }
+              )
+          )
+          print(f'Registered agent version: {agent.version}')
+          "
+
+      - name: Start the new agent version
+        run: |
+          # Get the latest version number
+          LATEST_VERSION=$(az cognitiveservices agent show \
+            --account-name ${{ secrets.FOUNDRY_ACCOUNT }} \
+            --project-name ${{ secrets.PROJECT_NAME }} \
+            --name ${{ secrets.AGENT_NAME }} \
+            --query "versions.latest.version" -o tsv)
+          
+          echo "Starting agent version: $LATEST_VERSION"
+          
+          az cognitiveservices agent start \
+            --account-name ${{ secrets.FOUNDRY_ACCOUNT }} \
+            --project-name ${{ secrets.PROJECT_NAME }} \
+            --name ${{ secrets.AGENT_NAME }} \
+            --agent-version $LATEST_VERSION
+
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Complete! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Agent registered and started successfully" >> $GITHUB_STEP_SUMMARY

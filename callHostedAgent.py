@@ -13,8 +13,8 @@ from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
 
 # Configuration
 PROJECT_ENDPOINT = os.getenv("AZURE_AI_PROJECT_ENDPOINT")
-AGENT_NAME = "TestConcurrentFlowasAgent"
-AGENT_VERSION = "7"  # Specify version
+AGENT_NAME = os.getenv("AGENT_NAME")
+AGENT_VERSION = os.getenv("AGENT_VERSION", "latest")
 
 # Initialize the client
 client = AIProjectClient(endpoint=PROJECT_ENDPOINT, credential=DefaultAzureCredential())

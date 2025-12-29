@@ -14,7 +14,7 @@ client = AIProjectClient(
 
 # Create the agent from a container image
 agent = client.agents.create_version(
-    agent_name="TestConcurrentFlowasAgent",
+    agent_name=os.getenv("AGENT_NAME"),
     definition=ImageBasedHostedAgentDefinition(
         container_protocol_versions=[ProtocolVersionRecord(protocol=AgentProtocol.RESPONSES, version="v1")],
         cpu="1",
