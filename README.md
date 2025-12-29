@@ -75,13 +75,21 @@ Add the following secrets to your repository (Settings → Secrets and variables
 ### Required Role Assignments for CI/CD Service Principal
 
 ```bash
-# ACR Push access
-az role assignment create --assignee <sp-app-id> --role "AcrPush" \
+# ACR Contributor access (for az acr build)
+az role assignment create --assignee <sp-app-id> --role "Contributor" \
   --scope /subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.ContainerRegistry/registries/<acr-name>
 
 # Cognitive Services access for agent management
 az role assignment create --assignee <sp-app-id> --role "Cognitive Services Contributor" \
   --scope /subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.CognitiveServices/accounts/<foundry-account>
+
+# Azure AI User access at Foundry resource level (required for agent registration)
+az role assignment create --assignee <sp-app-id> --role "Azure AI User" \
+  --scope /subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.CognitiveServices/accounts/<foundry-account>
+
+# Azure AI User access at Foundry Project level
+az role assignment create --assignee <sp-app-id> --role "Azure AI User" \
+  --scope /subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.CognitiveServices/accounts/<foundry-account>/projects/<project-name>
 ```
 
 ### Workflow Triggers
