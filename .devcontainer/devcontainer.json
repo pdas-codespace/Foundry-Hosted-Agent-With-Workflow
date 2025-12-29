@@ -1,0 +1,41 @@
+{
+    "name": "Foundry Hosted Agent",
+    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "features": {
+        "ghcr.io/devcontainers/features/azure-cli:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.azure-account",
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "ms-azuretools.vscode-azure-github-copilot"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.terminal.activateEnvironment": true
+            }
+        }
+    },
+    "postCreateCommand": "pip install --upgrade pip && pip install -r requirements.txt",
+    "postStartCommand": "az login --use-device-code || true",
+    "remoteEnv": {
+        "AZURE_AI_PROJECT_ENDPOINT": "${localEnv:AZURE_AI_PROJECT_ENDPOINT}",
+        "AZURE_OPENAI_ENDPOINT": "${localEnv:AZURE_OPENAI_ENDPOINT}",
+        "AZURE_OPENAI_CHAT_DEPLOYMENT_NAME": "${localEnv:AZURE_OPENAI_CHAT_DEPLOYMENT_NAME}",
+        "MODEL_NAME": "${localEnv:MODEL_NAME}"
+    },
+    "forwardPorts": [],
+    "portsAttributes": {},
+    "hostRequirements": {
+        "cpus": 2,
+        "memory": "4gb",
+        "storage": "32gb"
+    }
+}
