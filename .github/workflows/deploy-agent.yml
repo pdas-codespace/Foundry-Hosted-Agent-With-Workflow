@@ -87,7 +87,7 @@ jobs:
                       'AZURE_AI_PROJECT_ENDPOINT': os.environ['AZURE_AI_PROJECT_ENDPOINT'],
                       'AZURE_OPENAI_CHAT_DEPLOYMENT_NAME': 'gpt-5',
                       'MODEL_NAME': 'gpt-5',
-                      'AZURE_OPENAI_ENDPOINT': os.environ["AZURE_OPENAI_ENDPOINT"]
+                      'AZURE_OPENAI_ENDPOINT': os.environ['AZURE_OPENAI_ENDPOINT']
                   }
               )
           )
