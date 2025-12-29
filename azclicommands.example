@@ -1,0 +1,42 @@
+# Azure CLI Commands Reference
+# Replace the variables below with your actual values before running
+
+# Variables - Set these first
+FOUNDRY_ACCOUNT_NAME=<your-foundry-account>
+PROJECT_NAME=<your-project-name>
+AGENT_NAME=<your-agent-name>
+AGENT_VERSION=<version>
+SUBSCRIPTION_ID=<your-subscription-id>
+RESOURCE_GROUP=<your-resource-group>
+ACR_NAME=<your-acr-name>
+MANAGED_IDENTITY_OBJECT_ID=<managed-identity-object-id>
+
+# Start an agent
+az cognitiveservices agent start --account-name $FOUNDRY_ACCOUNT_NAME --project-name $PROJECT_NAME --name $AGENT_NAME --agent-version $AGENT_VERSION
+
+# Show agent details
+az cognitiveservices agent show --account-name $FOUNDRY_ACCOUNT_NAME --project-name $PROJECT_NAME --name $AGENT_NAME
+
+# Get access token for REST API calls
+TOKEN=$(az account get-access-token --resource https://management.azure.com/ --query accessToken -o tsv)
+
+# Enable capability host (one-time setup)
+curl --request PUT \
+  --url "https://management.azure.com/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.CognitiveServices/accounts/$FOUNDRY_ACCOUNT_NAME/capabilityHosts/accountcaphost?api-version=2025-10-01-preview" \
+  --header 'content-type: application/json' \
+  --header "authorization: Bearer $TOKEN" \
+  --data '{
+  "properties": {
+    "capabilityHostKind": "Agents",
+    "enablePublicHostingEnvironment": true
+    }
+ }'
+
+# Build and push container image to ACR
+az acr build --image $AGENT_NAME:$AGENT_VERSION --registry $ACR_NAME.azurecr.io --file Dockerfile .
+
+# Look up a service principal or user by object ID
+az ad sp show --id $MANAGED_IDENTITY_OBJECT_ID --query "{displayName:displayName, appId:appId, servicePrincipalType:servicePrincipalType}" -o json
+
+# Assign Cognitive Services OpenAI User role to managed identity
+az role assignment create --assignee $MANAGED_IDENTITY_OBJECT_ID --role "Cognitive Services OpenAI User" --scope "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP"
