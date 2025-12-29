@@ -40,13 +40,13 @@ jobs:
 
       - name: Login to Azure Container Registry
         run: |
-          az acr login --name ${{ secrets.ACR_NAME }}
+          az acr login --name ${{ vars.ACR_NAME }}
 
       - name: Build and push container image
         run: |
           az acr build \
             --image ${{ secrets.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }} \
-            --registry ${{ secrets.ACR_NAME }}.azurecr.io \
+            --registry ${{ vars.ACR_NAME }}.azurecr.io \
             --file Dockerfile .
 
       - name: Set up Python
@@ -61,7 +61,7 @@ jobs:
       - name: Register new agent version
         env:
           AZURE_AI_PROJECT_ENDPOINT: ${{ secrets.AZURE_AI_PROJECT_ENDPOINT }}
-          AGENT_CONTAINER_IMAGE: ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
+          AGENT_CONTAINER_IMAGE: ${{ vars.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}
           AGENT_NAME: ${{ secrets.AGENT_NAME }}
         run: |
           python -c "
