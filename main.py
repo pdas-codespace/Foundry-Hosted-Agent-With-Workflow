@@ -23,7 +23,7 @@ def create_agent():
     researcher = AzureOpenAIChatClient(credential=credential).create_agent(
         instructions=(
             "You're an expert market and product researcher. "
-            "Given a prompt, provide concise, factual insights, opportunities, and risks."
+            "Given a prompt, provide concise, factual insights, opportunities, and risks. Provide numbers driven examples when relevant"
         ),
         name="researcher",
     )
