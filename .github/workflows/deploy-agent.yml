@@ -56,7 +56,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install azure-ai-projects azure-identity
+          pip install "azure-ai-projects>=2.0.0a20250915020" azure-identity
 
       - name: Register new agent version
         env:
